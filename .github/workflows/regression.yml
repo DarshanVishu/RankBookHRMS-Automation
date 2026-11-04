@@ -15,6 +15,7 @@ on:
         options:
           - "src/test/resources/testng-web.xml"
           - "src/test/resources/testng-api.xml"
+          - "src/test/resources/testng-e2e.xml"
           - "src/test/resources/testng-all.xml"
 
 permissions:
@@ -87,13 +88,13 @@ jobs:
           path: target/allure-results/
           retention-days: 7
 
-      # GitHub Pages Artifact Preparation
+      # Prepare Pages artifact only on direct pushes or manual triggers on main
       - name: Setup GitHub Pages
-        if: always() && github.ref == 'refs/heads/main'
+        if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v4
 
       - name: Upload GitHub Pages Artifact
-        if: always() && github.ref == 'refs/heads/main'
+        if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: target/allure-report/
@@ -107,7 +108,12 @@ jobs:
   deploy-pages:
     name: Publish Allure Report to GitHub Pages
     needs: automation-tests
-    if: always() && github.ref == 'refs/heads/main'
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      !cancelled() &&
+      needs.automation-tests.result != 'cancelled'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
