@@ -2,20 +2,20 @@
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       suiteXml:
-        description: 'TestNG Suite XML to execute'
+        description: "TestNG Suite XML to execute"
         required: true
-        default: 'src/test/resources/testng-web.xml'
+        default: "src/test/resources/testng-web.xml"
         type: choice
         options:
-          - 'src/test/resources/testng-web.xml'
-          - 'src/test/resources/testng-api.xml'
-          - 'src/test/resources/testng-all.xml'
+          - "src/test/resources/testng-web.xml"
+          - "src/test/resources/testng-api.xml"
+          - "src/test/resources/testng-all.xml"
 
 permissions:
   contents: write
@@ -33,11 +33,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
 
       - name: Setup Google Chrome (Headless Runner)
         uses: browser-actions/setup-chrome@v1
@@ -56,7 +56,7 @@ jobs:
         run: |
           SUITE_FILE="${{ github.event.inputs.suiteXml || 'src/test/resources/testng-web.xml' }}"
           echo "Executing suite: $SUITE_FILE"
-          
+
           mvn clean test \
             -DsuiteXmlFile="$SUITE_FILE" \
             -Dheadless=true \
@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report-execution-${{ github.run_number }}
-          path: target/site/allure-maven-plugin/
+          path: target/allure-report/
           retention-days: 14
 
       - name: Archive Raw Allure Results
