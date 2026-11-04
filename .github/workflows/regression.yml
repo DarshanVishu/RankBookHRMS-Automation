@@ -39,16 +39,11 @@ jobs:
           java-version: "17"
           cache: "maven"
 
-      - name: Setup Google Chrome (Headless Runner)
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
       - name: Verify Environment & Binaries
         run: |
           java -version
           mvn -version
-          google-chrome --version
+          google-chrome --version || which google-chrome
 
       - name: Run TestNG Automation Suite
         id: run-tests
