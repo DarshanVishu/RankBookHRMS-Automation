@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Mobile Regression Suite" verbose="2">
+    <listeners>
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.AllureReportListener" />
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.AllureEnvironmentListener" />
+    <listener class-name="com.rankbook.hrms.automation.reporting.retry.AnnotationTransformer" />
+    </listeners>
+
+    <parameter name="deviceName" value="Pixel 8 API 37.2" />
+
+    <test name="Android App Geofence and Punch Tests">
+        <packages>
+            <package name="com.rankbook.hrms.automation.tests.mobile" />
+        </packages>
+    </test>
+</suite>

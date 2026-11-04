@@ -1,0 +1,17 @@
+﻿target/
+build/
+*.class
+allure-results/
+allure-report/
+.allure/
+*.log
+*.dump
+*.dumpstream
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+Thumbs.db
+.DS_Store

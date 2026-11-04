@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Web Regression Suite" verbose="2">
+    <listeners>
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.AllureReportListener" />
+    </listeners>
+
+    <test name="OrangeHRM Web Tests">
+        <packages>
+            <package name="com.rankbook.hrms.automation.tests.web" />
+        </packages>
+    </test>
+</suite>
