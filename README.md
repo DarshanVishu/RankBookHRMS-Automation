@@ -47,3 +47,80 @@ RankBookHRMS-Automation/
 │           └── testng-web.xml  # Web UI regression suite
 ├── pom.xml                     # Maven project descriptor & dependency management
 └── README.md
+🚀 Key Technical Highlights
+Multi-Layer Coverage: Validates frontend UI (Selenium / Playwright), backend REST APIs (REST Assured), and native apps (Appium).
+
+Headless CI-Ready Execution: Fully containerized Chrome runs in headless mode inside Ubuntu GitHub Actions runners.
+
+AspectJ Weaved Allure Reporting: In-flight capture of screenshots, request/response headers, parameters, and step-by-step logs.
+
+Process Isolation: Surefire configured with isolated forks (forkCount=1, reuseForks=false) to eliminate thread contamination.
+
+Live GitHub Pages Publishing: Artifacts auto-deploy to GitHub Pages on every push, preserving failure reports without stalling the pipeline.
+
+🛠️ Prerequisites & Local Setup
+Requirements
+JDK: Version 17 or higher
+
+Build Tool: Apache Maven 3.8+
+
+Browser: Google Chrome (latest stable)
+
+Clone & Install
+Bash
+git clone [https://github.com/DarshanVishu/RankBookHRMS-Automation.git](https://github.com/DarshanVishu/RankBookHRMS-Automation.git)
+cd RankBookHRMS-Automation
+mvn clean install -DskipTests
+⚡ Running Test Suites Locally
+Run targeted suites using Maven system properties:
+
+1. Web UI Tests (Headless or Browser Mode)
+Bash
+# Headless mode
+mvn clean test -DsuiteXmlFile="src/test/resources/testng-web.xml" -Dheadless=true
+
+# Headed mode (opens local browser)
+mvn clean test -DsuiteXmlFile="src/test/resources/testng-web.xml" -Dheadless=false
+2. API Contract & Functional Tests
+Bash
+mvn clean test -DsuiteXmlFile="src/test/resources/testng-api.xml"
+3. End-to-End (E2E) Flow Tests
+Bash
+mvn clean test -DsuiteXmlFile="src/test/resources/testng-e2e.xml" -Dheadless=true
+4. Full Master Suite
+Bash
+mvn clean test -DsuiteXmlFile="src/test/resources/testng-all.xml" -Dheadless=true
+📈 Generating Allure Reports Locally
+To spin up a local lightweight server displaying execution graphs and logs:
+
+Bash
+# Generate report files from raw execution data
+mvn allure:report
+
+# Serve the report directly in your default browser
+mvn allure:serve
+🔄 CI/CD Automation Pipeline
+The repository uses GitHub Actions (.github/workflows/regression.yml) to orchestrate runs:
+
+Trigger: Automated on push/pull requests to main, and manual execution via workflow_dispatch.
+
+Selective Execution: Supports on-demand suite selection directly from the GitHub UI dropdown (testng-web.xml, testng-api.xml, testng-e2e.xml, or testng-all.xml).
+
+Report Hosting: Packages the generated HTML report and publishes it to the github-pages environment.
+
+
+---
+
+### How to Update
+
+To update your repository's `README.md`:
+
+```powershell
+# In your local project directory:
+Set-Content -Path "README.md" -Value @'
+<PASTE ENTIRE MARKDOWN ABOVE HERE>
+'@ -Encoding UTF8
+
+git add README.md
+git commit -m "docs: enrich readme with architecture diagram, prerequisites, and execution guides"
+git push origin main
