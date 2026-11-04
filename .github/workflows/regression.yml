@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, master]
   pull_request:
     branches: [main, master]
   workflow_dispatch:
@@ -21,6 +21,9 @@ permissions:
   contents: write
   pages: write
   id-token: write
+
+env:
+  ACTIONS_ALLOW_NODE_RUNNER_FORCED: "true"
 
 jobs:
   automation-tests:
@@ -84,8 +87,32 @@ jobs:
           path: target/allure-results/
           retention-days: 7
 
+      # GitHub Pages Artifact Preparation
+      - name: Setup GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v4
+
+      - name: Upload GitHub Pages Artifact
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/allure-report/
+
       - name: Verify Test Step Status
         if: steps.run-tests.outcome != 'success'
         run: |
           echo "Test suite failed during execution. Failing build step."
           exit 1
+
+  deploy-pages:
+    name: Publish Allure Report to GitHub Pages
+    needs: automation-tests
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
