@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="RankBook HRMS iOS Safari (WebKit) Suite" verbose="1">
+    <listeners>
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.TestNGListener"/>
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.AllureReportListener"/>
+        <listener class-name="com.rankbook.hrms.automation.reporting.listeners.AllureEnvironmentListener"/>
+    </listeners>
+
+    <test name="iOS Safari Mobile Web Regression">
+        <classes>
+            <class name="com.rankbook.hrms.automation.tests.mobile.IosSafariHrmsTests"/>
+        </classes>
+    </test>
+</suite>

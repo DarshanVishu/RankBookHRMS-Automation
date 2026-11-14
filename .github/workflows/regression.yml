@@ -17,6 +17,7 @@ on:
           - "src/test/resources/testng-api.xml"
           - "src/test/resources/testng-e2e.xml"
           - "src/test/resources/testng-all.xml"
+          - "src/test/resources/testng-ios.xml"
 
 permissions:
   contents: write
@@ -84,20 +85,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: raw-allure-results-${{ github.run_number }}
+          name: raw-allure-results-desktop-${{ github.run_number }}
           path: target/allure-results/
           retention-days: 7
-
-      # Prepare Pages artifact only on direct pushes or manual triggers on main
-      - name: Setup GitHub Pages
-        if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/configure-pages@v4
-
-      - name: Upload GitHub Pages Artifact
-        if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/allure-report/
 
       - name: Verify Test Step Status
         if: steps.run-tests.outcome != 'success'
@@ -105,20 +95,116 @@ jobs:
           echo "Test suite failed during execution. Failing build step."
           exit 1
 
+  ios-safari-tests:
+    name: iOS Safari (WebKit) Mobile Execution
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Install Playwright WebKit & Ubuntu Dependencies
+        run: |
+          mvn test-compile exec:java -e \
+            -Dexec.classpathScope=test \
+            -Dexec.mainClass=com.microsoft.playwright.CLI \
+            -Dexec.args="install --with-deps webkit"
+
+      - name: Run iOS Safari HRMS Tests
+        id: run-ios-tests
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+        run: |
+          mvn test \
+            -DsuiteXmlFile="src/test/resources/testng-ios.xml" \
+            -Dheadless=true \
+            -Dallure.results.directory="target/allure-results"
+
+      - name: Copy Root Allure Results (If Produced)
+        if: always()
+        run: |
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
+            mkdir -p target/allure-results
+            cp -r allure-results/* target/allure-results/
+          fi
+
+      - name: Archive iOS Raw Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-allure-results-ios-${{ github.run_number }}
+          path: target/allure-results/
+          retention-days: 7
+
+      - name: Archive iOS Playwright Traces & Surefire Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-safari-traces-${{ github.run_number }}
+          path: |
+            target/playwright-traces/
+            target/surefire-reports/
+          retention-days: 14
+
+      - name: Verify iOS Test Step Status
+        if: steps.run-ios-tests.outcome != 'success'
+        run: |
+          echo "iOS Safari test suite failed during execution. Failing build step."
+          exit 1
+
   deploy-pages:
-    name: Publish Allure Report to GitHub Pages
-    needs: automation-tests
+    name: Publish Combined Allure Report to GitHub Pages
+    needs: [automation-tests, ios-safari-tests]
     if: |
       always() &&
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       !cancelled() &&
-      needs.automation-tests.result != 'cancelled'
+      needs.automation-tests.result != 'cancelled' &&
+      needs.ios-safari-tests.result != 'cancelled'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Download Desktop & iOS Allure Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: raw-allure-results-*-${{ github.run_number }}
+          path: target/allure-results/
+          merge-multiple: true
+
+      - name: Generate Combined Allure Report
+        run: mvn allure:report
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/allure-report/
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
