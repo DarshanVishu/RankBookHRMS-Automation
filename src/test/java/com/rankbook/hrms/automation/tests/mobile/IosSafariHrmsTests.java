@@ -118,13 +118,20 @@ public class IosSafariHrmsTests {
 
         Assert.assertTrue(page.url().toLowerCase().contains("leave"),
                 "Failed to navigate to Leave module on iOS Safari. Current URL: " + page.url());
+
+        // Wait for the Leave List filter card header to mount in Vue before checking collapsed state
+        Locator filterHeader = page.locator(".oxd-table-filter-header").first();
+        filterHeader.waitFor();
         assertNoHorizontalOverflow("Leave List");
 
-        // On mobile viewports (393px), OrangeHRM collapses the Leave List filter panel by default—expand it first
-        Locator filterToggleBtn = page.locator(".oxd-table-filter-header-options button").first();
         Locator visibleSelects = page.locator(".oxd-select-text:visible");
-        if (visibleSelects.count() == 0 && filterToggleBtn.isVisible()) {
-            filterToggleBtn.tap();
+        if (visibleSelects.count() == 0) {
+            Locator filterToggleBtn = page.locator(".oxd-table-filter-header-options button").first();
+            if (filterToggleBtn.isVisible()) {
+                filterToggleBtn.tap();
+            } else {
+                filterHeader.tap();
+            }
         }
 
         // Wait for visible select boxes (0 = Show Leave with Status, 1 = Leave Type)
