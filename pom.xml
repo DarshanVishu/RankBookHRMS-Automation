@@ -27,7 +27,7 @@
         <selenium.version>4.19.1</selenium.version>
         <appium.version>9.2.2</appium.version>
         <rest-assured.version>5.4.0</rest-assured.version>
-        <playwright.version>1.43.0</playwright.version>
+        <playwright.version>1.50.0</playwright.version>
         <webdrivermanager.version>5.8.0</webdrivermanager.version>
         <allure.version>2.26.0</allure.version>
         <aspectj.version>1.9.22</aspectj.version>
