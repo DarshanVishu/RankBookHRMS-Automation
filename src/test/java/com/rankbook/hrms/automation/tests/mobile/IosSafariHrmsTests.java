@@ -38,6 +38,15 @@ public class IosSafariHrmsTests {
         Locator hamburgerBtn = page.locator("i.oxd-topbar-header-hamburger, .oxd-topbar-header-hamburger").first();
         if (hamburgerBtn.isVisible()) {
             hamburgerBtn.tap();
+            // Wait until the mobile navigation drawer finishes sliding into the viewport (x >= 0)
+            page.waitForFunction(
+                    "() => {" +
+                    "  const nav = document.querySelector('aside.oxd-sidepanel, nav.oxd-navbar-nav');" +
+                    "  if (!nav) return false;" +
+                    "  const rect = nav.getBoundingClientRect();" +
+                    "  return rect.width > 100 && rect.left >= -1;" +
+                    "}"
+            );
         }
     }
 
