@@ -34,20 +34,28 @@ public class IosSafariHrmsTests {
         page.waitForLoadState();
     }
 
-    private void openMobileMenuIfCollapsed() {
+    private void openMobileDrawerAndTapMenu(String menuLabel) {
         Locator hamburgerBtn = page.locator("i.oxd-topbar-header-hamburger, .oxd-topbar-header-hamburger").first();
         if (hamburgerBtn.isVisible()) {
             hamburgerBtn.tap();
-            // Wait until the mobile navigation drawer finishes sliding into the viewport (x >= 0)
             page.waitForFunction(
                     "() => {" +
-                    "  const nav = document.querySelector('aside.oxd-sidepanel, nav.oxd-navbar-nav');" +
+                    "  const nav = document.querySelector('aside.oxd-sidepanel');" +
                     "  if (!nav) return false;" +
                     "  const rect = nav.getBoundingClientRect();" +
-                    "  return rect.width > 100 && rect.left >= -1;" +
+                    "  return rect.width > 150 && rect.left >= 0;" +
                     "}"
             );
         }
+
+        Locator menuItem = page.locator("aside.oxd-sidepanel a.oxd-main-menu-item",
+                new Page.LocatorOptions().setHasText(menuLabel)).first();
+        menuItem.waitFor();
+
+        // Scroll inside the sidebar container itself so Playwright doesn't shift the main layout viewport
+        menuItem.evaluate("el => el.scrollIntoView({ block: 'nearest', inline: 'nearest' })");
+        menuItem.tap(new Locator.TapOptions().setForce(true));
+        page.waitForLoadState();
     }
 
     private void assertNoHorizontalOverflow(String screenName) {
@@ -93,13 +101,9 @@ public class IosSafariHrmsTests {
     @Test(priority = 2, description = "Verify mobile drawer navigation, Leave filter expand, and Leave Type options on iOS Safari")
     public void testIosSafariLeaveMenuAndDropdownSelection() {
         loginToHrms();
-        openMobileMenuIfCollapsed();
+        openMobileDrawerAndTapMenu("Leave");
 
-        Locator leaveMenu = page.locator("a.oxd-main-menu-item", new Page.LocatorOptions().setHasText("Leave")).first();
-        leaveMenu.waitFor();
-        leaveMenu.tap();
-        page.waitForLoadState();
-
+        page.waitForURL(url -> url.toLowerCase().contains("leave"));
         Assert.assertTrue(page.url().toLowerCase().contains("leave"),
                 "Failed to navigate to Leave module on iOS Safari. Current URL: " + page.url());
         assertNoHorizontalOverflow("Leave List");
@@ -134,12 +138,9 @@ public class IosSafariHrmsTests {
     @Test(priority = 3, description = "Verify Attendance / Time module loads and Punch In/Out screen works on iOS Safari")
     public void testIosSafariAttendancePunchScreen() {
         loginToHrms();
-        openMobileMenuIfCollapsed();
+        openMobileDrawerAndTapMenu("Time");
 
-        Locator timeMenu = page.locator("a.oxd-main-menu-item", new Page.LocatorOptions().setHasText("Time")).first();
-        timeMenu.waitFor();
-        timeMenu.tap();
-        page.waitForLoadState();
+        page.waitForURL(url -> url.toLowerCase().contains("time") || url.toLowerCase().contains("attendance"));
 
         Locator attendanceTopTab = page.locator("span.oxd-topbar-body-nav-tab-item",
                 new Page.LocatorOptions().setHasText("Attendance")).first();
@@ -166,22 +167,17 @@ public class IosSafariHrmsTests {
     @Test(priority = 4, description = "Verify My Info profile form and date picker render cleanly on iOS Safari")
     public void testIosSafariMyInfoAndDatePicker() {
         loginToHrms();
-        openMobileMenuIfCollapsed();
+        openMobileDrawerAndTapMenu("My Info");
 
-        Locator myInfoMenu = page.locator("a.oxd-main-menu-item", new Page.LocatorOptions().setHasText("My Info")).first();
-        if (myInfoMenu.isVisible()) {
-            myInfoMenu.tap();
-            page.waitForLoadState();
-            assertNoHorizontalOverflow("My Info / Personal Details");
+        assertNoHorizontalOverflow("My Info / Personal Details");
 
-            // Check calendar/date input interaction on WebKit
-            Locator dateInput = page.locator(".oxd-date-input input").first();
-            if (dateInput.isVisible()) {
-                dateInput.scrollIntoViewIfNeeded();
-                dateInput.tap();
-                Assert.assertTrue(dateInput.isEditable(),
-                        "Date input field is locked or non-interactive on iOS Safari.");
-            }
+        // Check calendar/date input interaction on WebKit
+        Locator dateInput = page.locator(".oxd-date-input input").first();
+        if (dateInput.isVisible()) {
+            dateInput.scrollIntoViewIfNeeded();
+            dateInput.tap();
+            Assert.assertTrue(dateInput.isEditable(),
+                    "Date input field is locked or non-interactive on iOS Safari.");
         }
     }
 
