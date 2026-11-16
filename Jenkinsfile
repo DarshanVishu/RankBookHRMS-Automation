@@ -80,13 +80,13 @@ pipeline {
     post {
         always {
             script {
-                // Merge root allure-results if generated outside target/
                 if (isUnix()) {
                     sh '''
                         if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
                             mkdir -p target/allure-results
                             cp -r allure-results/* target/allure-results/
                         fi
+                        mvn allure:report
                     '''
                 } else {
                     bat '''
@@ -94,17 +94,14 @@ pipeline {
                             if not exist target\\allure-results mkdir target\\allure-results
                             xcopy /E /I /Y allure-results target\\allure-results >nul
                         )
+                        mvn allure:report
                     '''
                 }
             }
 
             junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
-            allure includeProperties: false,
-                   jdk: '',
-                   results: [[path: 'target/allure-results']]
-
-            archiveArtifacts artifacts: 'target/playwright-traces/**, target/surefire-reports/**',
+            archiveArtifacts artifacts: 'target/allure-report/**, target/playwright-traces/**, target/surefire-reports/**',
                              allowEmptyArchive: true
         }
     }
