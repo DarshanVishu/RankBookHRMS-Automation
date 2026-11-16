@@ -167,7 +167,7 @@ The repository uses GitHub Actions (`.github/workflows/regression.yml`) to orche
 
 ## 👨‍💻 Author
 
-**Darshan Vishu** — QA Automation & Software Development Engineer in Test (SDET)
+**Darshan Vishu** — QA Automation | Software Development Engineer in Test (SDET)
 
 * GitHub: [@DarshanVishu](https://github.com/DarshanVishu)
 
