@@ -124,3 +124,9 @@ Set-Content -Path "README.md" -Value @'
 git add README.md
 git commit -m "docs: enrich readme with architecture diagram, prerequisites, and execution guides"
 git push origin main
+
+## Author
+
+**Darshan Vishu** — QA Automation & Software Development Engineer in Test - SDET
+
+* GitHub: [@DarshanVishu](https://github.com/DarshanVishu)
